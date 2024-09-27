@@ -3,9 +3,7 @@
     <img src="/Logo_Original.png" width={100} class="rounded bg-white p-2" alt="Logo"/>
   </a>  
     <div class=" hidden sm:flex w-1/3 justify-evenly text-white items-center">
-        <p>Services</p>
-        <a href="public/Blog">Blog</a>
-        <p>About Us</p>
+
         <form action="/Private?/logout" method="POST"><button type="submit"  class="bg-white text-black p-2 rounded-xl">Logout</button></form>
     </div> 
     <div class="space-y-2 border p-2 rounded sm:hidden">
