@@ -1,4 +1,4 @@
-import { Actions, fail } from "@sveltejs/kit";
+import { type Actions, fail } from "@sveltejs/kit";
 import { redirect } from "@sveltejs/kit";
 import FirebaseService from "$lib/firebase/firebaseService";
 
@@ -15,7 +15,7 @@ export const actions: Actions = {
             console.error(err)
             return fail(400,{email, error:true,message:"Something went wrong please try again"})
         }finally{
-            throw redirect(303, "/Private")
+            throw redirect(303, "/Private/Social")
         }
         
 
@@ -36,7 +36,7 @@ export const actions: Actions = {
                 return fail(400, {email, error:true ,message:"Something went wrong contact support"})
             }
         }finally{
-           if(success) throw redirect(303, "/Private")
+           if(success) throw redirect(303, "/Private/Social")
         }
         
 

@@ -12,7 +12,7 @@
     <h2 class="text-5xl text-center font-bold">Nuestros Servicios</h2>
     <div class="flex justify-evenly mt-4">
         {#each services as service}
-        <div class="flex flex-col border w-3/12">
+        <div class="flex flex-col border w-3/12 bg-white rounded shadow-lg">
             <h3 class="text-center font-bold text-xl">
                 {service.title}
             </h3>

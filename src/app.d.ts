@@ -29,4 +29,30 @@ interface service {
   url:string
 }
 
-export {service};
+interface Post {
+  id: string;
+  titulo:string;
+  descripcion:string;
+  usuario:string;
+  usuario_id:string;
+  likes:[string];
+  comentarios:[Comment]
+}
+
+interface Comment {
+  id: string;
+  texto: string;
+  usuario: string;
+  usuario_id:string;
+  likes:[string];
+  comentarios:[Comment];
+}
+
+interface Profile {
+  id: string;
+  username: string;
+  usuario_id:string;
+  imagen:string;
+  bio:string;
+}
+export {service, Post, Profile};
