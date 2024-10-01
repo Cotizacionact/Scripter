@@ -14,7 +14,6 @@
         <label for="password">Password</label>
         <input class="shadow-sm rounded border p-1" type="password" name="password" id="password" placeholder="Password"/>
         <button type="submit" class="shadow-sm hover:shadow-md active:shadow-lg bg-green-500 text-white p-2 rounded hover:bg-green-700 active:bg-green-900">Login</button>
-        <p>Don't have an account yet? <a on:click={()=>state=1} class="text-blue-500 underline">Register</a></p> 
         {#if form?.error}
             <div class="text-red-500 text-center">{form.message}</div>
         {/if}

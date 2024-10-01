@@ -8,7 +8,7 @@ export async function load({cookies}:{cookies:Cookies}){
     const user = firebase.get_uid();
     let perfil:string|undefined|Profile = cookies.get("Perfil")
     let imagen = ""
-    if(perfil == undefined){
+    if(perfil == undefined || perfil == "undefined"){
         perfil = await firebase.get_profile()
         cookies.set("Perfil",JSON.stringify(perfil), {
             path: '/Private',

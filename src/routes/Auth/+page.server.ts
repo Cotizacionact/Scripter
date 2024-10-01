@@ -4,22 +4,7 @@ import FirebaseService from "$lib/firebase/firebaseService";
 
 export const actions: Actions = {
 
-    register: async ({request}) =>{
-        const body = await request.formData()
-        const email = body.get("email") as string
-        try {
-            const firebase= new FirebaseService();
-            firebase.register(email,body.get("password")as string)
-
-        }catch (err){
-            console.error(err)
-            return fail(400,{email, error:true,message:"Something went wrong please try again"})
-        }finally{
-            throw redirect(303, "/Private/Social")
-        }
-        
-
-    },
+    
     login:async ({request})=>{
         const formData = await request.formData()
         const firebase = new FirebaseService();

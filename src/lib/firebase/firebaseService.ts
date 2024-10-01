@@ -4,12 +4,14 @@ import {firebaseConfig} from "../../env"
 import {type Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User} from "firebase/auth"
 import { redirect } from "@sveltejs/kit"
 import type { Post, Profile } from "../../app"
+import { type FirebaseStorage, getDownloadURL, getStorage, ref, uploadBytes, type UploadResult } from "firebase/storage"
 
 export default class FirebaseService{
     private static instance: FirebaseService;
     private app:FirebaseApp
     private db:Firestore
     private auth:Auth
+    private storage:FirebaseStorage;
     private user:User|undefined|null;
 
     constructor(){
@@ -20,6 +22,7 @@ export default class FirebaseService{
        }
         this.db = getFirestore(this.app);
         this.auth = getAuth(this.app);
+        this.storage = getStorage(this.app);
         this.user = this.auth.currentUser
     }
 
@@ -81,6 +84,29 @@ export default class FirebaseService{
             likes:[]
         })
         
+    }
+
+    public async upload_image(carpeta:string,filename:string,file:File):Promise<string|Error>{
+        try{
+            const storage_ref = ref(this.storage,carpeta+"/"+filename)
+            const upload = await uploadBytes(storage_ref,file)
+            return await getDownloadURL(upload.ref)
+        }catch(error){
+            return new Error("Server error when uploading image")
+        }
+    }
+
+    public async create_profile(username:string,image:string,bio:string){
+        console.log("Creating profile")
+        try{
+            await setDoc(doc(this.db,"Perfil", this.get_uid()),{
+                bio:bio,
+                imagen:image,
+                username:username
+            })
+        }catch(error){
+            console.error(error)
+        }
     }
 
     public async get_post():Promise<[Post]>{
