@@ -82,6 +82,8 @@ export const actions: Actions = {
         const firebase = new FirebaseService();
         try{
 
+            firebase.handle_like()
+            
         }catch(err){
             console.error(err)
         }
