@@ -9,7 +9,7 @@
 
 <div class="m-10 bg-gray-100 rounded p-5 flex items-start">
     <div class="rounded-full w-1/4  bg-gray-300 flex justify-center items-end relative overflow-hidden">
-        <div class="h-32 w-64 rounded-full rounded-t-none hover:bg-black hover:bg-opacity-80 text-white flex justify-center p-2 text-3xl text-opacity-0 hover:text-opacity-80 absolute">
+        <div class="h-32 w-full rounded-full rounded-t-none hover:bg-black hover:bg-opacity-80 text-white flex justify-center p-2 text-3xl text-opacity-0 hover:text-opacity-80 absolute">
             <Icon src={BsCameraFill}></Icon>
         </div>
 

@@ -1,9 +1,9 @@
 import {getApps, initializeApp, type FirebaseApp} from "firebase/app"
-import {collection, Firestore, getDocs, getFirestore, doc, getDoc, query, where, setDoc} from "firebase/firestore"
+import {collection, Firestore, getDocs, getFirestore, doc, getDoc, query, where, setDoc, addDoc, updateDoc, runTransaction} from "firebase/firestore"
 import {firebaseConfig} from "../../env"
 import {type Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User} from "firebase/auth"
 import { redirect } from "@sveltejs/kit"
-import type { Post, Profile } from "../../app"
+import type { Comment, Post, Profile } from "../../app"
 import { type FirebaseStorage, getDownloadURL, getStorage, ref, uploadBytes, type UploadResult } from "firebase/storage"
 
 export default class FirebaseService{
@@ -64,7 +64,7 @@ export default class FirebaseService{
     }
 
     public static CreateUID(length:number) {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@!#$%&/()=?¡¿+-^{}[]:;.,|';
         let result = '';
         for (let i = 0; i < length; i++) {
             const randomIndex = Math.floor(Math.random() * characters.length);
@@ -76,14 +76,65 @@ export default class FirebaseService{
 
     public async create_post(titulo:string, descripcion:string, username:string){
         await setDoc(doc(this.db,"Post", FirebaseService.CreateUID(15)),{
-            comentarios:[],
+            comentarios:0,
             descripcion:descripcion,
             titulo:titulo,
             usuario:username,
             usuario_id:this.get_uid(),
-            likes:[]
+            likes:0
         })
         
+    }
+
+    public async create_comment(username: string, text: string, post_id: string, comentarios_num: number) {
+        const db = this.db;
+        const postRef = doc(db, "Post", post_id);
+        const comentariosRef = collection(postRef, "comentarios");
+        let comment_id = ""
+    
+        try {
+            await runTransaction(db, async (transaction) => {
+                // Add the comment
+                const new_comment = await addDoc(comentariosRef, {
+                    usuario: username,
+                    usuario_id: this.get_uid(),
+                    texto: text,
+                    likes: 0,
+                    comentarios: false
+                });
+                comment_id= new_comment.id
+                // Update the comment count
+                const postDoc = await transaction.get(postRef);
+                if (!postDoc.exists()) {
+                    throw "Post does not exist!";
+                }
+    
+                const newCommentCount = comentarios_num + 1;
+                transaction.update(postRef, { comentarios: newCommentCount });
+            });
+    
+            return comment_id
+        } catch (error) {
+            console.error("Transaction failed: ", error);
+            throw new Error("Error al crear comentario")
+        }
+    }
+
+    public async handle_like(){
+        //await runTransaction()
+    }
+
+
+    public async get_likes(current_posts:string[]){
+        const likes = await getDocs(query(collection(this.db, "Like"),where("postId", "in", current_posts)));
+        const likes_array = likes.docs.map(doc => doc.data())
+        return likes_array
+    }
+
+    public async get_comments(post_id:string):Promise<Comment[]>{
+        const comentarios = await getDocs(collection(this.db,"Post",post_id,"comentarios"));
+        const docs = comentarios.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs as Comment[];
     }
 
     public async upload_image(carpeta:string,filename:string,file:File):Promise<string|Error>{
@@ -92,7 +143,7 @@ export default class FirebaseService{
             const upload = await uploadBytes(storage_ref,file)
             return await getDownloadURL(upload.ref)
         }catch(error){
-            return new Error("Server error when uploading image")
+            throw new Error("Server error when uploading image")
         }
     }
 
@@ -106,8 +157,10 @@ export default class FirebaseService{
             })
         }catch(error){
             console.error(error)
+            throw new Error("Error al crear perfil")
         }
     }
+
 
     public async get_post():Promise<[Post]>{
         const query_snapshot = await getDocs(collection(this.db, "Post"));

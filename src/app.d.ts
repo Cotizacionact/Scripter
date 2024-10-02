@@ -35,8 +35,14 @@ interface Post {
   descripcion:string;
   usuario:string;
   usuario_id:string;
-  likes:[string];
-  comentarios:[Comment]
+  likes:number;
+  comentarios:number;
+  first_likes:Like[];
+}
+
+interface Like {
+
+  usuario:string;
 }
 
 interface Comment {
@@ -44,8 +50,8 @@ interface Comment {
   texto: string;
   usuario: string;
   usuario_id:string;
-  likes:[string];
-  comentarios:[Comment];
+  likes:number;
+  comentarios:boolean;
 }
 
 interface Profile {
@@ -55,4 +61,4 @@ interface Profile {
   imagen:string;
   bio:string;
 }
-export {service, Post, Profile};
+export {service, Post, Profile, Comment, Like};
