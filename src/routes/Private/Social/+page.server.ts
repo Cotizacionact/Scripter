@@ -6,8 +6,6 @@ import type { Profile } from "../../../app";
 export async function load(){
     const firebase = new FirebaseService();
     const publicaciones = await firebase.get_post();
-    const post_ids = publicaciones.map((doc)=>{return doc.id})
-    console.log(await firebase.get_likes(post_ids))
     return {
         publicaciones: publicaciones
     }
@@ -82,10 +80,11 @@ export const actions: Actions = {
         const firebase = new FirebaseService();
         try{
 
-            firebase.handle_like()
+            firebase.handle_like(data.get("Post ID") as string)
             
         }catch(err){
             console.error(err)
+            return fail(400, {error:true,message:"Algo salio mal con tu like"})
         }
     }
 

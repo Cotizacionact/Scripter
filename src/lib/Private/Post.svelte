@@ -3,6 +3,7 @@
     import { SlLike } from "svelte-icons-pack/sl";
     import { BiCommentDetail } from "svelte-icons-pack/bi";
     import { Icon } from "svelte-icons-pack";
+    import { enhance } from "$app/forms";
     let comentarios:Comment[] = []
     
     export let publicacion:Post
@@ -79,7 +80,7 @@
     <div class="flex my-2 space-x-2">
         <button on:click={addLike} class="bg-green-500 rounded p-2 text-white flex items-center w-32 justify-evenly hover:bg-green-700 active:bg-green-900"> {publicacion.likes} <Icon src={SlLike}/>  Me gusta </button>
         <button on:click={loadComments} class="bg-blue-500 rounded p-2 text-white flex items-center w-36 justify-evenly hover:bg-blue-700 active:bg-blue-900"> {publicacion.comentarios} <Icon src={BiCommentDetail}/> Comentarios</button>
-        <form action="/" on:submit={handleComment} class="w-10/12 space-x-2 flex">
+        <form  use:enhance on:submit={handleComment} class="w-10/12 space-x-2 flex">
             <input type="text" name="text" id="text" class="h-full w-full rounded border-black border p-1" placeholder="Escribe tu comentario">
             <button type="submit" class="bg-blue-500 rounded p-2 text-white flex items-center w-36 justify-evenly hover:bg-blue-700 active:bg-blue-900">Enviar</button>
         </form>

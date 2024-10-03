@@ -1,9 +1,9 @@
 import {getApps, initializeApp, type FirebaseApp} from "firebase/app"
-import {collection, Firestore, getDocs, getFirestore, doc, getDoc, query, where, setDoc, addDoc, updateDoc, runTransaction} from "firebase/firestore"
+import {collection, Firestore, getDocs, getFirestore, doc, getDoc, query, where, setDoc, addDoc, updateDoc, runTransaction, Transaction} from "firebase/firestore"
 import {firebaseConfig} from "../../env"
 import {type Auth, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, type User} from "firebase/auth"
 import { redirect } from "@sveltejs/kit"
-import type { Comment, Post, Profile } from "../../app"
+import type { Comment, Like, Post, Profile } from "../../app"
 import { type FirebaseStorage, getDownloadURL, getStorage, ref, uploadBytes, type UploadResult } from "firebase/storage"
 
 export default class FirebaseService{
@@ -93,21 +93,24 @@ export default class FirebaseService{
         let comment_id = ""
     
         try {
-            await runTransaction(db, async (transaction) => {
-                // Add the comment
-                const new_comment = await addDoc(comentariosRef, {
-                    usuario: username,
-                    usuario_id: this.get_uid(),
-                    texto: text,
-                    likes: 0,
-                    comentarios: false
-                });
-                comment_id= new_comment.id
+            await runTransaction(db, async (transaction:Transaction) => {
                 // Update the comment count
                 const postDoc = await transaction.get(postRef);
                 if (!postDoc.exists()) {
                     throw "Post does not exist!";
                 }
+                // Add the comment
+                comment_id= FirebaseService.CreateUID(15)
+                transaction.set(doc(comentariosRef,comment_id),
+                {
+                    usuario: username,
+                    usuario_id: this.get_uid(),
+                    texto: text,
+                    likes: 0,
+                    comentarios: false
+                }
+            )
+              
     
                 const newCommentCount = comentarios_num + 1;
                 transaction.update(postRef, { comentarios: newCommentCount });
@@ -120,15 +123,24 @@ export default class FirebaseService{
         }
     }
 
-    public async handle_like(){
-        //await runTransaction()
+    public async handle_like(post_id:string){
+        try{
+            await runTransaction(this.db,async (transaction:Transaction)=>{
+                const postRef = getDocs(query(collection(this.db, "Like"),where("postId", "==", post_id),where("usuario_id", "==", this.get_uid())))
+                const post = postRef
+                
+            })
+        }catch(err){
+            console.error(err)
+            throw new Error("Error al realizar o quitar un like")
+        }
     }
 
 
-    public async get_likes(current_posts:string[]){
+    public async get_likes(current_posts:string[]):Promise<Like[]>{
         const likes = await getDocs(query(collection(this.db, "Like"),where("postId", "in", current_posts)));
         const likes_array = likes.docs.map(doc => doc.data())
-        return likes_array
+        return likes_array as Like[]
     }
 
     public async get_comments(post_id:string):Promise<Comment[]>{

@@ -41,7 +41,6 @@ interface Post {
 }
 
 interface Like {
-
   usuario:string;
 }
 
