@@ -41,7 +41,9 @@ interface Post {
 }
 
 interface Like {
-  usuario:string;
+  usuario_id:string;
+  postID:string;
+  id:string;
 }
 
 interface Comment {
@@ -59,5 +61,28 @@ interface Profile {
   usuario_id:string;
   imagen:string;
   bio:string;
+  amigos:number;
 }
-export {service, Post, Profile, Comment, Like};
+
+interface Friend_Request {
+  request_id: string;
+  usuario_1_id:string;
+  usuario_2_id:string;
+  usuario_1_username:string;
+  aceptado:boolean;
+}
+
+interface Portafolio {
+  id: number;
+  title:string;
+  description:string;
+  image:string;
+  alt:string;
+  url:string;
+  video?:string;
+}
+
+export {
+  service, Post, Profile, Comment, Like, Friend_Request,
+  Portafolio
+};

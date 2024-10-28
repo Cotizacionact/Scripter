@@ -1,11 +1,18 @@
 import { type Actions, fail, json } from "@sveltejs/kit";
 import { redirect } from "@sveltejs/kit";
 import FirebaseService from "$lib/firebase/firebaseService";
-import type { Profile } from "../../../app";
+import type { Post, Profile } from "../../../app";
 
 export async function load(){
     const firebase = new FirebaseService();
     const publicaciones = await firebase.get_post();
+    const ids = publicaciones.map((publicacion:Post)=>{
+        return publicacion.id
+    })
+
+    
+    //const has_liked = firebase.get_likes(ids)
+
     return {
         publicaciones: publicaciones
     }
@@ -72,15 +79,27 @@ export const actions: Actions = {
     },
     Like: async ({request, cookies})=>{
         const data = await request.formData();
+        const firebase = new FirebaseService();
         const perfil = JSON.parse(cookies.get("Perfil") as string ) as Profile;
         const first_likes = JSON.parse(data.get("First Likes") as string)
+        const current_likes = Number(data.get("Likes") as string)
         if(first_likes.length<6){
-            first_likes.push({usuario:perfil.username})
+            const is_in_initial_likes = first_likes.filter((like:{usuario:string,usuario_id:string})=>{
+                return like.usuario_id == firebase.get_uid();
+            })
+            if(is_in_initial_likes.length == 0){
+                first_likes.push({usuario:perfil.username,usuario_id:firebase.get_uid()})
+            }else{
+                first_likes.splice(first_likes.indexOf(is_in_initial_likes[0]),1)
+            }
         }
-        const firebase = new FirebaseService();
+
         try{
 
-            firebase.handle_like(data.get("Post ID") as string)
+           const liked = await firebase.handle_like(data.get("Post ID") as string,current_likes,first_likes)
+           console.log(liked)
+           return JSON.stringify({liked:liked})
+
             
         }catch(err){
             console.error(err)

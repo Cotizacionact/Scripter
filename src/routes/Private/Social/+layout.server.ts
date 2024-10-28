@@ -6,6 +6,7 @@ import type { Profile } from "../../../app";
 export async function load({cookies}:{cookies:Cookies}){
     const firebase = new FirebaseService();
     const user = firebase.get_uid();
+    const friend_requests = await firebase.get_friend_requests();
     let perfil:string|undefined|Profile = cookies.get("Perfil")
     let imagen = ""
     if(perfil == undefined || perfil == "undefined"){
@@ -22,6 +23,7 @@ export async function load({cookies}:{cookies:Cookies}){
     
     return{
         user: user,
-        imagen:imagen
+        imagen:imagen,
+        friend_requests:friend_requests
     }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Comment, Post } from "../../app";
-    import { SlLike } from "svelte-icons-pack/sl";
+    import { SlLike, SlDislike } from "svelte-icons-pack/sl";
     import { BiCommentDetail } from "svelte-icons-pack/bi";
     import { Icon } from "svelte-icons-pack";
     import { enhance } from "$app/forms";
@@ -8,8 +8,10 @@
     
     export let publicacion:Post
 
-    async function handleComment(event:SubmitEvent){
+    let loaded_comments = false
+    export let liked = false;
 
+    async function handleComment(event:SubmitEvent){
         const form = event.target as HTMLFormElement;
         const formData = new FormData(form);
         
@@ -42,25 +44,29 @@
     }
 
     async function loadComments(event:Event){
-        const formData = new FormData();
-        formData.append("Post ID", publicacion.id);
-        const req = await fetch("/Private/Social?/getComentarios",{
-            method:"POST",
-            body:formData,
-            headers: {
-                'x-sveltekit-action': 'true'
-            }
-        })
-
-        const json = await req.json()
-        const coments = JSON.parse(JSON.parse(json.data)[0])
-        comentarios = [...coments,...comentarios]
+        if(!loaded_comments){
+            const formData = new FormData();
+            formData.append("Post ID", publicacion.id);
+            const req = await fetch("/Private/Social?/getComentarios",{
+                method:"POST",
+                body:formData,
+                headers: {
+                    'x-sveltekit-action': 'true'
+                }
+            })
+    
+            const json = await req.json()
+            const coments = JSON.parse(JSON.parse(json.data)[0])
+            comentarios = [...coments,...comentarios]
+            loaded_comments = true
+        }
     }
 
     async function addLike(event:Event){
         const formData = new FormData();
         formData.append("Post ID", publicacion.id);
         formData.append("First Likes", JSON.stringify(publicacion.first_likes))
+        formData.append("Likes", String(publicacion.likes))
         const req = await fetch("/Private/Social?/Like",{
             method:"POST",
             body:formData,
@@ -68,6 +74,14 @@
                 'x-sveltekit-action': 'true'
             }
         })
+        const res = await req.json()
+        if(JSON.parse(JSON.parse(res.data)[0]).liked){
+            publicacion.likes = publicacion.likes+1
+            liked = true
+        }else{
+            publicacion.likes = publicacion.likes-1
+            liked = false
+        }
     }
 </script>
 
@@ -78,9 +92,12 @@
     </div>
     <p class="border rounded p-2">{publicacion.descripcion}</p>
     <div class="flex my-2 space-x-2">
-        <button on:click={addLike} class="bg-green-500 rounded p-2 text-white flex items-center w-32 justify-evenly hover:bg-green-700 active:bg-green-900"> {publicacion.likes} <Icon src={SlLike}/>  Me gusta </button>
+        <button on:click={addLike} class="bg-green-500 rounded p-2 text-white flex items-center w-32 justify-evenly hover:bg-green-700 active:bg-green-900"> {publicacion.likes} 
+            <Icon src={(liked) ? SlDislike : SlLike}/> 
+            
+            Me gusta </button>
         <button on:click={loadComments} class="bg-blue-500 rounded p-2 text-white flex items-center w-36 justify-evenly hover:bg-blue-700 active:bg-blue-900"> {publicacion.comentarios} <Icon src={BiCommentDetail}/> Comentarios</button>
-        <form  use:enhance on:submit={handleComment} class="w-10/12 space-x-2 flex">
+        <form method="POST"  use:enhance on:submit={handleComment} class="w-10/12 space-x-2 flex">
             <input type="text" name="text" id="text" class="h-full w-full rounded border-black border p-1" placeholder="Escribe tu comentario">
             <button type="submit" class="bg-blue-500 rounded p-2 text-white flex items-center w-36 justify-evenly hover:bg-blue-700 active:bg-blue-900">Enviar</button>
         </form>

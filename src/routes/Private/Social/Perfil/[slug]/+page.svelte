@@ -3,8 +3,16 @@
     import { Icon } from "svelte-icons-pack";
     import { BsCameraFill } from "svelte-icons-pack/bs";
     import { RiUserFacesUserAddFill } from "svelte-icons-pack/ri";
+    import SocialService from "$lib/services/SocialService";
+    import { page } from '$app/stores';
+
+    const { params } = $page;
     export let data;
     const {user, publicaciones} = data;
+
+    const social = new SocialService()
+
+
 </script>
 
 <div class="m-10 bg-gray-100 rounded p-5 flex items-start">
@@ -22,7 +30,7 @@
 
             <div class="flex items-center space-x-4">
                 <h3 class="text-4xl font-bold">{user.username}</h3>
-                <button class="bg-green-500 text-white p-2 rounded flex items-center space-x-2 font-bold"> <Icon src={RiUserFacesUserAddFill} /> <p>Agregar Amigo</p></button>
+                <button on:click={()=>social.add_friend(params.slug)} class="bg-green-500 text-white p-2 rounded flex items-center space-x-2 font-bold"> <Icon src={RiUserFacesUserAddFill} /> <p>Agregar Amigo</p></button>
             </div>
             <p class="p-4">{user.bio}</p>
                 
